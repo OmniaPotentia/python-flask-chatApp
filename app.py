@@ -1,30 +1,12 @@
 from flask import Flask, jsonify
-from Database.userDB import getMongoConnection
+from Route.route import route_blueprint
 from Helpers.customJsonEncoderhelpers import CustomJSONEncoder
 
 app = Flask(__name__)
 app.json_encoder = CustomJSONEncoder
-userCollection = getMongoConnection()
 
-
-@app.route('/')
-def hello():
-    results = []
-    cursor = userCollection.find()
-    for document in cursor:
-        document['_id'] = str(document['_id'])  # Serialize ObjectId to string
-        results.append(document)
-    return jsonify(results)
-
-
-@app.route('/post')
-def writeDb():
-    # Example: Insert a document into the collection
-    document = {"name": "John Doe", "age": 30, "city": "New York"}
-    result = userCollection.insert_one(document)
-
-    return f"Document inserted with ID: {result.inserted_id}"
-
+# Register the route blueprint
+app.register_blueprint(route_blueprint)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
