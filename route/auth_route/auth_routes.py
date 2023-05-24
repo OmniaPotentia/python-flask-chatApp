@@ -89,7 +89,10 @@ async def create_user():
 # Protected route (requires authentication)
 @auth_routes.route('protected', methods=['GET'])
 @jwt_required()  # Note the parentheses after jwt_required
-def protected():
+async def protected():
     # Access protected resource
     current_user = get_jwt_identity()
+    # find user credentials for activate status
+    db_user = await UserService.find_by_username(current_user)
+    await UserService.change_status(db_user)
     return jsonify({'message': f'Hello, {current_user}! This is a protected route.'}), HTTP_STATUS_CODES["HTTP_OK"]

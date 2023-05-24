@@ -1,5 +1,6 @@
 from random import getrandbits
 
+from database.async_user_db import get_async_user_mongo_connection
 from database.reset_token_db import get_reset_token_mongo_connection
 from database.user_db import get_user_mongo_connection
 from models.reset_model_token import ResetToken
@@ -7,22 +8,23 @@ from models.user_model import User
 
 user_collection = get_user_mongo_connection()
 reset_token_collection = get_reset_token_mongo_connection()
+async_user_collection = get_async_user_mongo_connection()
 
 
 class UserService:
     @staticmethod
     async def find_by_email(email):
-        found_email = user_collection.find_one({'email': email})
+        found_email = await async_user_collection.find_one({'email': email})
         return found_email
 
     @staticmethod
     async def find_by_mobile_number(mobile_number):
-        found_mobile_number = await user_collection.find_one({'mobile_number': mobile_number})
+        found_mobile_number = await async_user_collection.find_one({'mobile_number': mobile_number})
         return found_mobile_number
 
     @staticmethod
     async def find_by_username(username):
-        found_username = await user_collection.find_one({'username': username})
+        found_username = await async_user_collection.find_one({'username': username})
         return found_username
 
     @staticmethod
@@ -39,16 +41,16 @@ class UserService:
         return inserted_user
 
     @staticmethod
-    async def change_status(user, user_status, email, mobile_number):
+    async def change_status(user):
         query = {}
-        if email:
-            query['email'] = user
-        elif mobile_number:
-            query['mobile_number'] = user
+        if user['email']:
+            query = {'email': user['email']}
+        elif user['mobile_number']:
+            query = {'mobile_number': user['mobile_number']}
         else:
-            query['username'] = user
-
-        await user_collection.update_one(query, {'$set': {'activeStatus': user_status}})
+            query = {'username': user['username']}
+        user['active_status'] = False if user['active_status'] else True
+        await async_user_collection.update_one(query, {'$set': {'active_status': user['active_status']}})
 
     @staticmethod
     async def create_google_user(username, email, oauth_profile):
