@@ -2,7 +2,6 @@ import os
 
 import motor.motor_asyncio
 from dotenv import load_dotenv
-from pymongo import MongoClient
 
 # Load variables from the .env file
 load_dotenv()
