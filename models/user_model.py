@@ -1,3 +1,4 @@
+import datetime
 import os
 import random
 
@@ -29,6 +30,8 @@ class User(Document):
                                      default=lambda: str(100000 + random.randint(0, 900000)))
     active_status = BooleanField(default=False)
     oauth_profiles = EmbeddedDocumentListField(OAuthProfile)
+    created_at = StringField(default=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    last_updated_at = StringField(default=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
     meta = {
         'indexes': [
@@ -44,6 +47,3 @@ class User(Document):
         if self.password and not self.password.startswith('$2b$'):
             self.password = self.generate_hash(self.password)
         return super(User, self).save(*args, **kwargs)
-
-    def compare_password(self, candidate_password):
-        return bcrypt.checkpw(candidate_password.encode('utf-8'), self.password.encode('utf-8'))

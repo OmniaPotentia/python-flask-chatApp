@@ -19,6 +19,8 @@ class UserEncoder(json.JSONEncoder):
                 "verification_token": o.verification_token,
                 "active_status": o.active_status,
                 "oauth_profiles": o.oauth_profiles,
+                "created_at": o.created_at,
+                "last_updated_at": o.last_updated_at
             }
             return user_dict
         return super().default(o)

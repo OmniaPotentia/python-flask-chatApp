@@ -2,11 +2,9 @@ from random import getrandbits
 
 from database.async_user_db import get_async_user_mongo_connection
 from database.reset_token_db import get_reset_token_mongo_connection
-from database.user_db import get_user_mongo_connection
 from models.reset_model_token import ResetToken
 from models.user_model import User
 
-user_collection = get_user_mongo_connection()
 reset_token_collection = get_reset_token_mongo_connection()
 async_user_collection = get_async_user_mongo_connection()
 
@@ -60,7 +58,7 @@ class UserService:
             'oauth_profiles': [oauth_profile],
             'password': str(getrandbits(10)),
         }
-        await user_collection.insert_one(user)
+        await async_user_collection.insert_one(user)
         return user
 
     @staticmethod
@@ -79,16 +77,16 @@ class UserService:
 
     @staticmethod
     async def change_password(user_id, password):
-        user = await user_collection.find_one({'_id': user_id})
+        user = await async_user_collection.find_one({'_id': user_id})
         if not user:
             raise ValueError('User not found')
         user['password'] = password
-        await user_collection.save(user)
+        await async_user_collection.save(user)
         return user
 
     @staticmethod
     async def find_by_oauth_profile(provider, profile_id):
-        return await user_collection.find_one(
+        return await async_user_collection.find_one(
             {'oauth_profiles.provider': provider, 'oauth_profiles.profileId': profile_id})
 
     @staticmethod
@@ -97,12 +95,12 @@ class UserService:
 
     @staticmethod
     async def get_list():
-        return await user_collection.find().sort('createdAt', -1).to_list()
+        return await async_user_collection.find().sort('createdAt', -1).to_list()
 
     @staticmethod
     async def delete_user(user_id):
-        await user_collection.delete_one({'_id': user_id})
+        await async_user_collection.delete_one({'_id': user_id})
 
     @staticmethod
     async def add_username(user, username):
-        await user_collection.update_one({'email': user}, {'$set': {'username': username}})
+        await async_user_collection.update_one({'email': user}, {'$set': {'username': username}})
