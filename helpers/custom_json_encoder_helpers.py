@@ -1,5 +1,6 @@
-from bson import ObjectId
 import json
+
+from bson import ObjectId
 
 
 # Custom JSON encoder to handle ObjectId serialization
